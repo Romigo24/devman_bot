@@ -66,17 +66,19 @@ def main():
                 timestamp = devman_response['last_attempt_timestamp']
             elif devman_response['status'] == 'timeout':
                 timestamp = devman_response['timestamp_to_request']
+            
+            new_attempts = devman_response.get('new_attempts', [])
+            if new_attempts:
+                lesson_title = new_attempts[0]['lesson_title']
+                lesson_url = new_attempts[0]['lesson_url']
+                
+                if new_attempts[0]['is_negative']:
+                    text = f'Проверена работа "{lesson_title}".\n \nК сожалению, в работе нашлись ошибки.\n \nСсылка на урок: {lesson_url}'
+                    bot.send_message(chat_id=chat_id, text=text)
+                else:
+                    text = f'Проверена работа "{lesson_title}".\n \nПреподавателю все понравилось, можно приступать к следующему уроку! .\n \nСсылка на урок: {lesson_url}'
+                    bot.send_message(chat_id=chat_id, text=text)
 
-            if devman_response['new_attempts'][0]['is_negative']:
-                lesson_title = devman_response['new_attempts'][0]['lesson_title']
-                lesson_url = devman_response['new_attempts'][0]['lesson_url']
-                text = f'Проверена работа "{lesson_title}".\n \nК сожалению, в работе нашлись ошибки.\n \nСсылка на урок: {lesson_url}'
-                bot.send_message(chat_id=chat_id, text=text)
-            else:
-                lesson_title = devman_response['new_attempts'][0]['lesson_title']
-                lesson_url = devman_response['new_attempts'][0]['lesson_url']
-                text = f'Проверена работа "{lesson_title}".\n \nПреподавателю все понравилось, можно приступать к следующему уроку! .\n \nСсылка на урок: {lesson_url}'
-                bot.send_message(chat_id=chat_id, text=text)
         except requests.exceptions.ReadTimeout:
             continue
         except requests.exceptions.Timeout:
